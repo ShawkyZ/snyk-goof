@@ -18,6 +18,21 @@ var fs = require('fs');
 // prototype-pollution
 var _ = require('lodash');
 
+// rate limiting
+var rateLimit = require('express-rate-limit');
+
+var commandRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: 'Too many requests, please try again later.',
+});
+
+var fileOpsRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: 'Too many requests, please try again later.',
+});
+
 exports.index = function (req, res, next) {
   Todo.
     find({}).
@@ -36,7 +51,7 @@ exports.index = function (req, res, next) {
 
 exports.admin = function (req, res, next) {
   console.log(req.body);
-  User.find({ username: req.body.username, password: req.body.password }, function (err, users) {
+  User.find({ username: String(req.body.username || ''), password: String(req.body.password || '') }, function (err, users) {
     if (users.length > 0) {
       return res.render('admin', {
         title: 'Admin Access Granted',
@@ -74,7 +89,7 @@ function parse(todo) {
   return t;
 }
 
-exports.create = function (req, res, next) {
+var createHandler = function (req, res, next) {
   // console.log('req.body: ' + JSON.stringify(req.body));
 
   var item = req.body.content;
@@ -111,6 +126,7 @@ exports.create = function (req, res, next) {
     // res.redirect('/#' + todo.content.toString('base64'));
   });
 };
+exports.create = [commandRateLimit, createHandler];
 
 exports.destroy = function (req, res, next) {
   Todo.findById(req.params.id, function (err, todo) {
@@ -163,7 +179,7 @@ function isBlank(str) {
   return (!str || /^\s*$/.test(str));
 }
 
-exports.import = function (req, res, next) {
+var importHandler = function (req, res, next) {
   if (!req.files) {
     res.send('No files were uploaded.');
     return;
@@ -218,8 +234,9 @@ exports.import = function (req, res, next) {
 
   res.redirect('/');
 };
+exports.import = [fileOpsRateLimit, importHandler];
 
-exports.about_new = function (req, res, next) {
+var aboutNewHandler = function (req, res, next) {
     console.log(JSON.stringify(req.query));
     return res.render("about_new.dust",
       {
@@ -228,6 +245,7 @@ exports.about_new = function (req, res, next) {
         device: req.query.device
       });
 };
+exports.about_new = [fileOpsRateLimit, aboutNewHandler];
 
 // Prototype Pollution
 

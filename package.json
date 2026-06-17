@@ -46,7 +46,9 @@
     "st": "0.2.4",
     "stream-buffers": "^3.0.1",
     "tap": "^5.7.0",
-    "snyk": "^1.290.2"
+    "snyk": "^1.290.2",
+    "csurf": "^1.11.0",
+    "express-rate-limit": "^6.0.0"
   },
   "devDependencies": {
     "browserify": "^13.1.1"
