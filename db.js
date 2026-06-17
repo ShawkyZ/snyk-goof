@@ -45,7 +45,7 @@ User.find({ username: 'admin' }).exec(function (err, users) {
   console.log(users);
   if (users.length === 0) {
     console.log('no admin');
-    new User({ username: 'admin', password: 'SuperSecretPassword' }).save(function (err, user, count) {
+    new User({ username: 'admin', password: process.env.ADMIN_PASSWORD || '' }).save(function (err, user, count) {
         if (err) {
           console.log('error saving admin user');
         }
