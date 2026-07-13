@@ -27,6 +27,7 @@ var fileUpload = require('express-fileupload');
 var dust = require('dustjs-linkedin');
 var dustHelpers = require('dustjs-helpers');
 var cons = require('consolidate');
+var csrf = require('csurf');
 
 var app = express();
 var routes = require('./routes');
@@ -44,6 +45,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(fileUpload());
+app.use(csrf({ cookie: true }));
 
 // Routes
 app.use(routes.current_user);
