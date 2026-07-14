@@ -36,7 +36,7 @@ exports.index = function (req, res, next) {
 
 exports.admin = function (req, res, next) {
   console.log(req.body);
-  User.find({ username: req.body.username, password: req.body.password }, function (err, users) {
+  User.find({ username: String(req.body.username), password: String(req.body.password) }, function (err, users) {
     if (users.length > 0) {
       return res.render('admin', {
         title: 'Admin Access Granted',
@@ -74,7 +74,14 @@ function parse(todo) {
   return t;
 }
 
-exports.create = function (req, res, next) {
+var RateLimit = require('express-rate-limit');
+var createLimiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message: 'Too many requests, please try again later.'
+});
+
+exports.create = [createLimiter, function (req, res, next) {
   // console.log('req.body: ' + JSON.stringify(req.body));
 
   var item = req.body.content;
@@ -110,7 +117,7 @@ exports.create = function (req, res, next) {
 
     // res.redirect('/#' + todo.content.toString('base64'));
   });
-};
+}];
 
 exports.destroy = function (req, res, next) {
   Todo.findById(req.params.id, function (err, todo) {
