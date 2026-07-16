@@ -18,6 +18,12 @@ var fs = require('fs');
 // prototype-pollution
 var _ = require('lodash');
 
+var RateLimit = require('express-rate-limit');
+var importLimiter = new RateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+});
+
 exports.index = function (req, res, next) {
   Todo.
     find({}).
@@ -163,7 +169,7 @@ function isBlank(str) {
   return (!str || /^\s*$/.test(str));
 }
 
-exports.import = function (req, res, next) {
+exports.import = [importLimiter, function (req, res, next) {
   if (!req.files) {
     res.send('No files were uploaded.');
     return;
@@ -217,7 +223,7 @@ exports.import = function (req, res, next) {
   });
 
   res.redirect('/');
-};
+}];
 
 exports.about_new = function (req, res, next) {
     console.log(JSON.stringify(req.query));

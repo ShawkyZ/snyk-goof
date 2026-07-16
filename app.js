@@ -17,6 +17,7 @@ var http = require('http');
 var path = require('path');
 var ejsEngine = require('ejs-locals');
 var cookieParser = require('cookie-parser');
+var csurf = require('csurf');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var logger = require('morgan');
@@ -44,6 +45,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(fileUpload());
+app.use(csurf());
 
 // Routes
 app.use(routes.current_user);
