@@ -18,6 +18,13 @@ var fs = require('fs');
 // prototype-pollution
 var _ = require('lodash');
 
+var RateLimit = require('express-rate-limit');
+var importLimiter = new RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  message: 'Too many import requests, please try again later.'
+});
+
 exports.index = function (req, res, next) {
   Todo.
     find({}).
@@ -162,6 +169,8 @@ exports.current_user = function (req, res, next) {
 function isBlank(str) {
   return (!str || /^\s*$/.test(str));
 }
+
+exports.importLimiter = importLimiter;
 
 exports.import = function (req, res, next) {
   if (!req.files) {
