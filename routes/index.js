@@ -11,7 +11,7 @@ var moment = require('moment');
 var exec = require('child_process').exec;
 
 // zip-slip
-var fileType = require('file-type');
+// file-type v16+ is ESM-only; load asynchronously via dynamic import
 var AdmZip = require('adm-zip');
 var fs = require('fs');
 
@@ -171,9 +171,11 @@ exports.import = function (req, res, next) {
 
   var importFile = req.files.importFile;
   var data;
-  var importedFileType = fileType(importFile.data);
+  import('file-type').then(function(fileTypeModule) {
+    return fileTypeModule.fileTypeFromBuffer(importFile.data);
+  }).then(function(importedFileType) {
   var zipFileExt = { ext: "zip", mime: "application/zip" };
-  if (importedFileType === null) {
+  if (importedFileType === null || importedFileType === undefined) {
     importedFileType = { ext: "txt", mime: "text/plain" };
   }
   if (importedFileType["mime"] === zipFileExt["mime"]) {
@@ -217,6 +219,7 @@ exports.import = function (req, res, next) {
   });
 
   res.redirect('/');
+  }).catch(next);
 };
 
 exports.about_new = function (req, res, next) {
