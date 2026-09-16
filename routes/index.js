@@ -36,7 +36,7 @@ exports.index = function (req, res, next) {
 
 exports.admin = function (req, res, next) {
   console.log(req.body);
-  User.find({ username: req.body.username, password: req.body.password }, function (err, users) {
+  User.find({ username: String(req.body.username), password: String(req.body.password) }, function (err, users) {
     if (users.length > 0) {
       return res.render('admin', {
         title: 'Admin Access Granted',
