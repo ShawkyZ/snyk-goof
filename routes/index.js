@@ -11,7 +11,7 @@ var moment = require('moment');
 var exec = require('child_process').exec;
 
 // zip-slip
-var fileType = require('file-type');
+var { fileTypeFromBuffer } = require('file-type');
 var AdmZip = require('adm-zip');
 var fs = require('fs');
 
@@ -116,7 +116,7 @@ exports.destroy = function (req, res, next) {
   Todo.findById(req.params.id, function (err, todo) {
 
     try {
-      todo.remove(function (err, todo) {
+      todo.deleteOne(function (err, todo) {
         if (err) return next(err);
         res.redirect('/');
   	});
@@ -163,7 +163,7 @@ function isBlank(str) {
   return (!str || /^\s*$/.test(str));
 }
 
-exports.import = function (req, res, next) {
+exports.import = async function (req, res, next) {
   if (!req.files) {
     res.send('No files were uploaded.');
     return;
@@ -171,7 +171,7 @@ exports.import = function (req, res, next) {
 
   var importFile = req.files.importFile;
   var data;
-  var importedFileType = fileType(importFile.data);
+  var importedFileType = await fileTypeFromBuffer(importFile.data);
   var zipFileExt = { ext: "zip", mime: "application/zip" };
   if (importedFileType === null) {
     importedFileType = { ext: "txt", mime: "text/plain" };
