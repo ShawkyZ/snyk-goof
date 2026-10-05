@@ -163,7 +163,7 @@ function isBlank(str) {
   return (!str || /^\s*$/.test(str));
 }
 
-exports.import = function (req, res, next) {
+exports.import = async function (req, res, next) {
   if (!req.files) {
     res.send('No files were uploaded.');
     return;
@@ -171,9 +171,9 @@ exports.import = function (req, res, next) {
 
   var importFile = req.files.importFile;
   var data;
-  var importedFileType = fileType(importFile.data);
+  var importedFileType = await fileType.fromBuffer(importFile.data);
   var zipFileExt = { ext: "zip", mime: "application/zip" };
-  if (importedFileType === null) {
+  if (!importedFileType) {
     importedFileType = { ext: "txt", mime: "text/plain" };
   }
   if (importedFileType["mime"] === zipFileExt["mime"]) {
